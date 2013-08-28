@@ -1,5 +1,5 @@
-require 'office/constants'
-require 'office/word'
+require 'word/constants'
+require 'word/word'
 
-module Office
+module Word
 end

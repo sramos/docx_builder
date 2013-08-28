@@ -30,7 +30,7 @@ class WordDocumentsTest < Test::Unit::TestCase
     doc.save(filename)
     assert File.file?(filename)
     assert File.stat(filename).size > 0
-    assert !Office::PackageComparer.are_equal?(SIMPLE_TEST_DOC_PATH, filename)
+    assert !Word::PackageComparer.are_equal?(SIMPLE_TEST_DOC_PATH, filename)
 
     file.delete
   end
@@ -44,22 +44,22 @@ class WordDocumentsTest < Test::Unit::TestCase
     doc.save(filename)
     assert File.file?(filename)
     assert File.stat(filename).size > 0
-    assert Office::PackageComparer.are_equal?(SIMPLE_TEST_DOC_PATH, filename)
+    assert Word::PackageComparer.are_equal?(SIMPLE_TEST_DOC_PATH, filename)
 
     file.delete
   end
 
   def test_blank_document
-    assert_equal Office::WordDocument.blank_document.plain_text, ""
+    assert_equal Word::WordDocument.blank_document.plain_text, ""
   end
 
   def test_blank_document_with_base_document
     simple_text = load_simple_doc.plain_text
-    assert_equal simple_text, Office::WordDocument.blank_document(:base_document => SIMPLE_TEST_DOC_PATH).plain_text
+    assert_equal simple_text, Word::WordDocument.blank_document(:base_document => SIMPLE_TEST_DOC_PATH).plain_text
   end
 
   def test_build_document
-    doc = Office::WordDocument.blank_document
+    doc = Word::WordDocument.blank_document
     doc.add_heading "Heading"
     doc.add_paragraph "intro"
     doc.add_sub_heading "Sub-heading"
@@ -71,7 +71,7 @@ class WordDocumentsTest < Test::Unit::TestCase
 
   # TODO: Actually test the style of the created heading
   def test_build_document_with_styles
-    doc = Office::WordDocument.blank_document
+    doc = Word::WordDocument.blank_document
     doc.add_heading "Heading"
     doc.add_paragraph "intro"
     doc.add_sub_heading "Sub-heading"
@@ -84,7 +84,7 @@ class WordDocumentsTest < Test::Unit::TestCase
 
   def test_from_data
     doc_1 = nil
-    File.open(SIMPLE_TEST_DOC_PATH) { |f| doc_1 = Office::WordDocument.from_data(f.read) }
+    File.open(SIMPLE_TEST_DOC_PATH) { |f| doc_1 = Word::WordDocument.from_data(f.read) }
     doc_2 = load_simple_doc
     assert_equal doc_1.plain_text, doc_2.plain_text
   end
@@ -94,20 +94,20 @@ class WordDocumentsTest < Test::Unit::TestCase
     assert !data.nil?
     assert data.length > 0
 
-    doc_1 = Office::WordDocument.from_data(data)
+    doc_1 = Word::WordDocument.from_data(data)
     doc_2 = load_simple_doc
     assert_equal doc_1.plain_text, doc_2.plain_text
   end
 
   def test_complex_parsing
-    doc = Office::WordDocument.new(COMPLEX_TEST_DOC_PATH)
+    doc = Word::WordDocument.new(COMPLEX_TEST_DOC_PATH)
     assert doc.plain_text.include?("Presiding Peasant: Dennis")
     assert doc.plain_text.include?("Assessment Depot: Swampy Castle (might be sinking)")
     replace_and_check(doc, "Swampy Castle (might be sinking)", "Farcical Aquatic Ceremony")
   end
 
   def test_image_addition
-    doc = Office::WordDocument.blank_document
+    doc = Word::WordDocument.blank_document
     doc.add_heading "Heading"
     doc.add_paragraph "intro"
     doc.add_sub_heading "Sub-heading"
@@ -125,7 +125,7 @@ class WordDocumentsTest < Test::Unit::TestCase
     filename = file.path
     doc.save(filename)
 
-    doc_copy = Office::WordDocument.new(filename)
+    doc_copy = Word::WordDocument.new(filename)
     assert_equal doc.plain_text, doc_copy.plain_text
     assert_equal doc_copy.plain_text, "Heading\nintro\nSub-heading\nbody\nSub-heading\n\nSub-heading\n\nSub-heading\n\nend\n"
 
@@ -135,7 +135,7 @@ class WordDocumentsTest < Test::Unit::TestCase
   end
 
   def test_image_replacement
-    doc = Office::WordDocument.new(File.join(File.dirname(__FILE__), 'content', 'image_replacement_test.docx'))
+    doc = Word::WordDocument.new(File.join(File.dirname(__FILE__), 'content', 'image_replacement_test.docx'))
     doc.replace_all("IMAGE", test_image)
 
     file = Tempfile.new('test_image_addition_doc')
@@ -143,7 +143,7 @@ class WordDocumentsTest < Test::Unit::TestCase
     filename = file.path
     doc.save(filename)
 
-    doc_copy = Office::WordDocument.new(filename)
+    doc_copy = Word::WordDocument.new(filename)
     assert_equal doc_copy.plain_text, "Header\n\n\n\nABC\n\nDEF\n\nABCDEF\n\n"
 
     assert_not_nil doc_copy.get_part("/word/media/image1.jpeg")
@@ -154,49 +154,49 @@ class WordDocumentsTest < Test::Unit::TestCase
   end
 
   def test_complex_search_and_replace
-    source = Office::WordDocument.new(File.join(File.dirname(__FILE__), 'content', 'complex_replacement_source.docx'))
+    source = Word::WordDocument.new(File.join(File.dirname(__FILE__), 'content', 'complex_replacement_source.docx'))
     source.replace_all("{{BLOCK_1}}", ["So much Sow!", test_image, nil, "Hopefully crispy"])
     source.replace_all("{{BLOCK_2}}", ["Boudin", "bacon", "ham", "hock", "meatball", "salami", "andouille"])
 
-    target = Office::WordDocument.new(File.join(File.dirname(__FILE__), 'content', 'complex_replacement_target.docx'))
+    target = Word::WordDocument.new(File.join(File.dirname(__FILE__), 'content', 'complex_replacement_target.docx'))
     assert docs_are_equivalent?(source, target)
   end
 
   def test_table_search_and_replace
-    source = Office::WordDocument.new(File.join(File.dirname(__FILE__), 'content', 'table_replacement_source.docx'))
+    source = Word::WordDocument.new(File.join(File.dirname(__FILE__), 'content', 'table_replacement_source.docx'))
     source.replace_all("{{MY_TABLE}}", { :column_1 => ["Alpha", "One", 1], :column_2 => ["Bravo", "Two", 2], "Column 3" => nil, "Column 4" => [], :column_5 => "Echo"})
 
-    target = Office::WordDocument.new(File.join(File.dirname(__FILE__), 'content', 'table_replacement_target.docx'))
+    target = Word::WordDocument.new(File.join(File.dirname(__FILE__), 'content', 'table_replacement_target.docx'))
     assert docs_are_equivalent?(source, target)
   end
 
   def test_image_within_table_search_and_replace
-    source = Office::WordDocument.new(File.join(File.dirname(__FILE__), 'content', 'image_within_table_replacement_source.docx'))
+    source = Word::WordDocument.new(File.join(File.dirname(__FILE__), 'content', 'image_within_table_replacement_source.docx'))
     source.replace_all("{{MY_TABLE}}", { :column_1 => ["Alpha", "One", 1], :column_2 => ["Bravo", test_image, 2], "Column 3" => ["Charlie", nil, 3]})
 
-    target = Office::WordDocument.new(File.join(File.dirname(__FILE__), 'content', 'image_within_table_replacement_target.docx'))
+    target = Word::WordDocument.new(File.join(File.dirname(__FILE__), 'content', 'image_within_table_replacement_target.docx'))
     assert docs_are_equivalent?(source, target)
   end
 
   def test_table_within_table_search_and_replace
-    source = Office::WordDocument.new(File.join(File.dirname(__FILE__), 'content', 'table_within_table_replacement_source.docx'))
+    source = Word::WordDocument.new(File.join(File.dirname(__FILE__), 'content', 'table_within_table_replacement_source.docx'))
     inner_table = { :one => ["1", "one"], :two => [ "2", "two"]}
     source.replace_all("{{MY_TABLE}}", { :column_1 => ["Alpha", "One"], :column_2 => ["Bravo", inner_table, 2], "Column 3" => ["Charlie"]})
 
-    target = Office::WordDocument.new(File.join(File.dirname(__FILE__), 'content', 'table_within_table_replacement_target.docx'))
+    target = Word::WordDocument.new(File.join(File.dirname(__FILE__), 'content', 'table_within_table_replacement_target.docx'))
     assert docs_are_equivalent?(source, target)
   end
 
   def test_complex_within_table_search_and_replace
-    source = Office::WordDocument.new(File.join(File.dirname(__FILE__), 'content', 'complex_within_table_replacement_source.docx'))
+    source = Word::WordDocument.new(File.join(File.dirname(__FILE__), 'content', 'complex_within_table_replacement_source.docx'))
     source.replace_all("{{MY_TABLE}}", { :column_1 => "Alpha", :column_2 => [["pre", test_image]], "Column 3" => [["Charlie", "post"]]})
 
-    target = Office::WordDocument.new(File.join(File.dirname(__FILE__), 'content', 'complex_within_table_replacement_target.docx'))
+    target = Word::WordDocument.new(File.join(File.dirname(__FILE__), 'content', 'complex_within_table_replacement_target.docx'))
     assert docs_are_equivalent?(source, target)
   end
 
   def test_adding_tables
-    source = Office::WordDocument.blank_document
+    source = Word::WordDocument.blank_document
     source.add_heading "Heading"
     source.add_paragraph "intro"
     source.add_sub_heading "Sub-heading"
@@ -207,12 +207,12 @@ class WordDocumentsTest < Test::Unit::TestCase
     source.replace_all("{{PLACEHOLDER_1}}", "Delta Echo Foxtrot Golf")
     source.replace_all("{{PLACEHOLDER_2}}", "Hotel India Juliet Kilo")
 
-    target = Office::WordDocument.new(File.join(File.dirname(__FILE__), 'content', 'add_tables_target.docx'))
+    target = Word::WordDocument.new(File.join(File.dirname(__FILE__), 'content', 'add_tables_target.docx'))
     assert docs_are_equivalent?(source, target)
   end
 
   def test_adding_tables_with_style
-    source = Office::WordDocument.blank_document
+    source = Word::WordDocument.blank_document
     source.add_heading "Heading"
     source.add_paragraph "intro"
     source.add_sub_heading "Sub-heading"
@@ -223,14 +223,14 @@ class WordDocumentsTest < Test::Unit::TestCase
     source.replace_all("{{PLACEHOLDER_1}}", "Delta Echo Foxtrot Golf")
     source.replace_all("{{PLACEHOLDER_2}}", "Hotel India Juliet Kilo")
 
-    target = Office::WordDocument.new(File.join(File.dirname(__FILE__), 'content', 'add_tables_with_style_target.docx'))
+    target = Word::WordDocument.new(File.join(File.dirname(__FILE__), 'content', 'add_tables_with_style_target.docx'))
     assert docs_are_equivalent?(source, target)
   end
 
   private
 
   def load_simple_doc
-    Office::WordDocument.new(SIMPLE_TEST_DOC_PATH)
+    Word::WordDocument.new(SIMPLE_TEST_DOC_PATH)
   end
 
   def replace_and_check(doc, source, replacement)
@@ -241,7 +241,7 @@ class WordDocumentsTest < Test::Unit::TestCase
 
   def stress_test_replace(doc_path)
     1000.times do
-      doc = Office::WordDocument.new(doc_path)
+      doc = Word::WordDocument.new(doc_path)
       replace_and_check(doc, random_substring(doc.plain_text), random_text)
     end
   end

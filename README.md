@@ -10,7 +10,7 @@ docx\_builder lets you create a new Word document from a template document. Then
 
 ## Details
 
-Word documents are represented by `Office::WordDocument` objects. The following methods (there are others) are available to work with Word documents:
+Word documents are represented by `Word::WordDocument` objects. The following methods (there are others) are available to work with Word documents:
 
 `.blank_document(*options={}*)` - Create a new document. If you supply a `:base_document`option then the new document is based on the document you supply. Otherwise it is initialized from an internal blank document.
 

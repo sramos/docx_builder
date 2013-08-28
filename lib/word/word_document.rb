@@ -92,6 +92,8 @@ module Word
     end
 
     # keys of hash are column headings, each value an array of column data
+    # the column data can be text, hash, or array data (see the add_paragraph method)
+    # a hash column will be treated as a subtable instead of text runs if the hash includes :create_table => true
     # Available options:
     #   :table_style - Table style to use (defaults to LightGrid)
     #   :column_widths - Array of column widths in twips (1 inch = 1440 twips)
@@ -119,6 +121,9 @@ module Word
       when (replacement.is_a?(Magick::Image) or replacement.is_a?(Magick::ImageList))
         runs = @main_doc.replace_all_with_empty_runs(source_text)
         runs.each { |r| r.replace_with_run_fragment(create_image_run_fragment(replacement)) }
+      when replacement.is_a?(Hash)
+        runs = @main_doc.replace_all_with_empty_runs(source_text)
+        runs.each { |r| r.replace_with_body_fragments(create_body_fragments(replacement, {:create_table => true})) }
       else
         runs = @main_doc.replace_all_with_empty_runs(source_text)
         runs.each { |r| r.replace_with_body_fragments(create_body_fragments(replacement)) }
@@ -130,7 +135,11 @@ module Word
       when (item.is_a?(Magick::Image) or item.is_a?(Magick::ImageList))
         [ "<w:p>#{create_image_run_fragment(item)}</w:p>" ]
       when item.is_a?(Hash)
-        [ create_table_fragment(item, options) ]
+        if item.delete(:create_table) || options.delete(:create_table)
+          [ create_table_fragment(item, options) ]
+        else
+          [ create_paragraph_fragment(item, options) ]
+        end
       when item.is_a?(Array)
         create_multiple_fragments(item)
       else
@@ -193,7 +202,7 @@ module Word
           table_cell = create_table_cell_fragment(v, i,
             :width => column_widths ? column_widths[j] : nil,
             :style => column_styles ? column_styles[j] : nil)
-          fragment << table_cell
+          fragment << table_cell.gsub("</w:p><w:p>", '')
         end
         fragment << "</w:tr>"
       end
@@ -211,7 +220,6 @@ module Word
       else
         ""
       end
-
       width = options.delete(:width)
       xml = create_body_fragments(item, options).join
       # Word validation rules seem to require a w:p immediately before a /w:tc
@@ -229,13 +237,40 @@ module Word
       array.map { |item| create_body_fragments(item) }.flatten
     end
 
+    # Create a paragraph fragment for use in a table
+    # Text can be:
+    #   A single string such as "text" - inserts that text
+    #   A hash such as {:content => "text", :style => "style"} - inserts that text with that character style
+    #   An array such as ["text1", "text2"] - inserts each piece of text as a separate run
+    #   An array of hashes such as [{:content => "text1", :style => "style1"}, {:content => "text2", :style => "style2"}]
+    #      - inserts each piece of text as a separate run with the specified character style
+    # NOTE: You may mix strings and hashes in a single array
+    # NOTE: styles supplied in the text parameter are character styles, not paragraph styles
+    # Available options:
+    #   :style - Paragraph style to use
     def create_paragraph_fragment(text, options={})
       style = options.delete(:style)
       fragment = "<w:p>"
       if style
         fragment << "<w:pPr><w:pStyle w:val=\"#{style}\"/></w:pPr>"
       end
-      fragment << "<w:r><w:t>#{Nokogiri::XML::Document.new.encode_special_chars(text)}</w:t></w:r></w:p>"
+      if text.is_a? Hash
+        content = text.delete(:content)
+        style = text.delete(:style)
+        fragment << "<w:r><w:rPr><w:rStyle w:val=\"#{style}\"/></w:rPr><w:t>#{Nokogiri::XML::Document.new.encode_special_chars(content)}</w:t></w:r></w:p>"
+      elsif text.is_a? Array
+        text.each do |run|
+          if run.is_a? Hash
+            content = run.delete(:content)
+            style = run.delete(:style)
+            fragment << "<w:r><w:rPr><w:rStyle w:val=\"#{style}\"/></w:rPr><w:t>#{Nokogiri::XML::Document.new.encode_special_chars(content)}</w:t></w:r></w:p>"
+          else
+            fragment << "<w:r><w:t>#{Nokogiri::XML::Document.new.encode_special_chars(run)}</w:t></w:r></w:p>"
+          end
+        end
+      else
+        fragment << "<w:r><w:t>#{Nokogiri::XML::Document.new.encode_special_chars(text)}</w:t></w:r></w:p>"
+      end
       fragment
     end
 

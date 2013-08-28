@@ -46,13 +46,38 @@ module Word
       p
     end
 
+    # Add a paragraph to this document
+    # Text can be:
+    #   A single string such as "text" - inserts that text
+    #   A hash such as {:content => "text", :style => "style"} - inserts that text with that character style
+    #   An array such as ["text1", "text2"] - inserts each piece of text as a separate run
+    #   An array of hashes such as [{:content => "text1", :style => "style1"}, {:content => "text2", :style => "style2"}]
+    #      - inserts each piece of text as a separate run with the specified character style
+    # NOTE: You may mix strings and hashes in a single array
+    # NOTE: styles supplied in the text parameter are character styles, not paragraph styles
+    # Available options:
+    #   :style - Paragraph style to use
     def add_paragraph(text, options={})
       p = @main_doc.add_paragraph
       style = options.delete(:style)
       if style
         p.add_style(style)
       end
-      p.add_text_run(text)
+      if text.is_a? Hash
+        content = text.delete(:content)
+        p.add_text_run(content, text)
+      elsif text.is_a? Array
+        text.each do |run|
+          if run.is_a? Hash
+            content = run.delete(:content)
+            p.add_text_run(content, run)
+          else
+            p.add_text_run(run)
+          end
+        end
+      else
+        p.add_text_run(text)
+      end
       p
     end
 

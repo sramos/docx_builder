@@ -19,8 +19,13 @@ module Word
       # TODO return style object
     end
 
-    def add_text_run(text)
+    # Available options:
+    #   :style - Character style to apply to this run
+    def add_text_run(text, options={})
       r_node = @node.add_child(@node.document.create_element("r"))
+      if style = options.delete(:style)
+        style_r_node(r_node, style)
+      end
       populate_r_node(r_node, text)
 
       r = Run.new(r_node, self)
@@ -34,11 +39,19 @@ module Word
       t_node.content = text
     end
 
+    def style_r_node(r_node, style)
+      rPr_node = r_node.add_child(@node.document.create_element("rPr"))
+      rStyle_node = rPr_node.add_child(@node.document.create_element("rStyle"))
+      rStyle_node["w:val"] = style
+    end
+
     def add_run_with_fragment(fragment)
       r = Run.new(@node.add_child(fragment), self)
       @runs << r
       r
     end
+
+    # Everything from here down is concerned with search & replace functionality
 
     def replace_all_with_text(source_text, replacement_text)
       return if source_text.nil? or source_text.empty?

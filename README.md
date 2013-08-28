@@ -18,7 +18,14 @@ Word documents are represented by `Word::WordDocument` objects. The following me
 
 `.add_sub_heading(*text*)` - Add the specified text using the Heading2 style. Returns the paragraph.
 
-`.add_paragraph(*text*, *options={}*)` - Adds the specified text as a new paragraph. If you supply a `:style` option sets the style of the text accordingly. Returns the paragraph.
+`.add_paragraph(*text*, *options={}*)` - Adds the specified text as a new paragraph. If you supply a `:style` option sets the paragraph style of the text accordingly. Returns the paragraph.
+
+The `text` parameter allows specifying multiple runs with character styles. It can be:
+
+- A single string such as "text" - inserts that text
+- A hash such as {:content => "text", :style => "style"} - inserts that text with that character style
+- An array such as ["text1", "text2"] - inserts each piece of text as a separate run
+- An array of hashes such as [{:content => "text1", :style => "style1"}, {:content => "text2", :style => "style2"}] - inserts each piece of text as a separate run with the specified character style
 
 `.add_image(*image*, *options={}*)` - Inserts the supplied `Magick::Image` or `ImageList` object as a new image. If you supply a `:style` option sets the style of the text accordingly.
 

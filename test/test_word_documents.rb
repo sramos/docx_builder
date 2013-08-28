@@ -75,11 +75,24 @@ class WordDocumentsTest < Test::Unit::TestCase
     doc.add_heading "Heading"
     doc.add_paragraph "intro"
     doc.add_sub_heading "Sub-heading"
-    doc.add_paragraph "Third level heading", {:style => "Heading 3"}
+    doc.add_paragraph "Third level heading", {:style => "Heading3"}
     doc.add_paragraph "body"
     doc.add_paragraph ""
     doc.add_paragraph "end"
     assert_equal doc.plain_text, "Heading\nintro\nSub-heading\nThird level heading\nbody\n\nend\n"
+  end
+
+  def test_build_paragraphs_with_styles
+    doc = Word::WordDocument.blank_document
+    doc.add_paragraph "First paragraph"
+    doc.add_paragraph "Second paragraph with a paragraph style", {:style => "Heading3"}
+    doc.add_paragraph ["Third paragraph ", "with multiple text runs"]
+    doc.add_paragraph({:content => "Fourth paragraph with a character style", :style => "NewStyle"}, {})
+    doc.add_paragraph [{:content => "Fifth paragraph with ", :style => "NewStyle"}, {:content => "multiple styled runs", :style => "NewStyle2"}]
+    doc.add_paragraph [{:content => "Sixth paragraph with ", :style => "NewStyle"}, "mixed runs"]
+
+    target = Word::WordDocument.new(File.join(File.dirname(__FILE__), 'content', 'multiple_paragraphs.docx'))
+    assert docs_are_equivalent?(doc, target)
   end
 
   def test_from_data

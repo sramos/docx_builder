@@ -6,7 +6,7 @@ Gem::Specification.new do |spec|
   spec.description = "Generate and modify Word .docx files programatically"
   spec.authors     = ["Mike Gunderloy", "Mike Welham"]
   spec.email       = "MikeG1@larkfarm.com"
-  spec.files       = ["lib/docx_builder.rb"]
+  spec.files       = `git ls-files`.split("\n")
   spec.homepage    = "https://github.com/ffmike/docx_builder"
   spec.add_dependency("nokogiri", ">= 1.5.2")
   spec.add_dependency("rmagick", ">= 2.12.2")

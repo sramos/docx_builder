@@ -12,4 +12,5 @@ Gem::Specification.new do |spec|
   spec.add_dependency("rmagick", ">= 2.12.2")
   spec.add_dependency("rubyzip", ">= 0.9.8")
   spec.add_development_dependency("equivalent-xml", ">= 0.2.9")
+  spec.license = "MIT"
 end

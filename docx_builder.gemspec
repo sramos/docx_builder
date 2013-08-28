@@ -1,6 +1,6 @@
 Gem::Specification.new do |spec|
   spec.name        = "docx_builder"
-  spec.version     = "0.3.5"
+  spec.version     = "0.3.6"
   spec.date        = "2013-08-28"
   spec.summary     = "Generate Microsoft Word Office Open XML files"
   spec.description = "Generate and modify Word .docx files programatically"

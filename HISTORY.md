@@ -1,3 +1,9 @@
+# 0.3.6
+
+## 8-28-2013
+
+- Fixing problem with missing files in 0.3.5.
+
 # 0.3.5
 
 ## 8-28-2013

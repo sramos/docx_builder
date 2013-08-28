@@ -1,6 +1,6 @@
 require 'test/unit'
 require 'date'
-require 'office_docs'
+require 'docx_builder'
 require 'equivalent-xml'
 
 class WordDocumentsTest < Test::Unit::TestCase

@@ -1,3 +1,9 @@
+# 0.3.8
+
+## 8-29-2013
+
+- Preserve whitespace in table cells.
+
 # 0.3.7
 
 ## 8-29-2013

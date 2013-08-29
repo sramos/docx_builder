@@ -257,19 +257,19 @@ module Word
       if text.is_a? Hash
         content = text.delete(:content)
         style = text.delete(:style)
-        fragment << "<w:r><w:rPr><w:rStyle w:val=\"#{style}\"/></w:rPr><w:t>#{Nokogiri::XML::Document.new.encode_special_chars(content)}</w:t></w:r></w:p>"
+        fragment << "<w:r><w:rPr><w:rStyle w:val=\"#{style}\"/></w:rPr><w:t xml:space=\"preserve\">#{Nokogiri::XML::Document.new.encode_special_chars(content)}</w:t></w:r></w:p>"
       elsif text.is_a? Array
         text.each do |run|
           if run.is_a? Hash
             content = run.delete(:content)
             style = run.delete(:style)
-            fragment << "<w:r><w:rPr><w:rStyle w:val=\"#{style}\"/></w:rPr><w:t>#{Nokogiri::XML::Document.new.encode_special_chars(content)}</w:t></w:r></w:p>"
+            fragment << "<w:r><w:rPr><w:rStyle w:val=\"#{style}\"/></w:rPr><w:t xml:space=\"preserve\">#{Nokogiri::XML::Document.new.encode_special_chars(content)}</w:t></w:r></w:p>"
           else
-            fragment << "<w:r><w:t>#{Nokogiri::XML::Document.new.encode_special_chars(run)}</w:t></w:r></w:p>"
+            fragment << "<w:r><w:t xml:space=\"preserve\">#{Nokogiri::XML::Document.new.encode_special_chars(run)}</w:t></w:r></w:p>"
           end
         end
       else
-        fragment << "<w:r><w:t>#{Nokogiri::XML::Document.new.encode_special_chars(text)}</w:t></w:r></w:p>"
+        fragment << "<w:r><w:t xml:space=\"preserve\">#{Nokogiri::XML::Document.new.encode_special_chars(text)}</w:t></w:r></w:p>"
       end
       fragment
     end

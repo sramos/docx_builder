@@ -254,6 +254,30 @@ class WordDocumentsTest < Test::Unit::TestCase
     assert docs_are_equivalent?(source, target)
   end
 
+  def test_adding_table_with_special_first_last_columns
+    source = Word::WordDocument.blank_document
+    table = {
+      'A' => [1, 2, 3],
+      'B' => [4, 5, 6],
+      'C' => [7, 8, 9]
+    }
+    properties = Word::TableProperties.new('LightGrid', nil, nil, {:first_column => true, :last_column => true})
+    source.add_table(table, :table_properties => properties)
+
+    target = Word::WordDocument.new(File.join(File.dirname(__FILE__), 'content', 'add_table_with_special_first_last_columns_target.docx'))
+    assert docs_are_equivalent?(source, target)
+  end
+
+  def test_adding_page_break
+    source = Word::WordDocument.blank_document
+    source.add_paragraph("First Paragraph")
+    source.add_page_break()
+    source.add_paragraph("Second Paragraph")
+
+    target = Word::WordDocument.new(File.join(File.dirname(__FILE__), 'content', 'add_page_break_target.docx'))
+    assert docs_are_equivalent?(source, target)
+  end
+
   private
 
   def load_simple_doc

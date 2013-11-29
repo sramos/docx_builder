@@ -37,6 +37,11 @@ module Word
       table_node.xpath(".//w:p").each { |p| @paragraphs << Paragraph.new(p, self) }
     end
 
+    def add_xml_fragment(xml_fragment)
+      node = @body_node.add_child(xml_fragment)
+      return node
+    end
+
     def plain_text
       text = ""
       @paragraphs.each do |p|

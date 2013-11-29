@@ -81,6 +81,11 @@ module Word
       p
     end
 
+    # Adds a page break to this document
+    def add_page_break
+      @main_doc.add_xml_fragment(create_page_break_fragment)
+    end
+
     def add_image(image, options={}) # image must be an Magick::Image or ImageList
       p = @main_doc.add_paragraph
       style = options.delete(:style)
@@ -272,6 +277,11 @@ module Word
         fragment << "<w:r><w:t xml:space=\"preserve\">#{Nokogiri::XML::Document.new.encode_special_chars(text)}</w:t></w:r></w:p>"
       end
       fragment
+    end
+
+    def create_page_break_fragment
+      fragment = '<w:p><w:r><w:br w:type="page" /></w:r></w:p>'
+      return fragment
     end
 
     def debug_dump
